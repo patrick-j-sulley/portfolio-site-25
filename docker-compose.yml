@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./portfolio_django:/app
+      - ./portfolio_django/staticfiles:/app/portfolio_django/staticfiles  # Ensure this path is correct
+    environment:
+      - DJANGO_SETTINGS_MODULE=portfolio_django.settings
+      - PYTHONUNBUFFERED=1
+
+  vue:
+    build:
+      context: .
+      dockerfile: Dockerfile.vue
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./portfolio_vue:/app
+    environment:
+      - NODE_ENV=development
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - django
+      - vue
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./portfolio_django/staticfiles:/app/portfolio_django/staticfiles  # Ensure this path is correct
